@@ -5,6 +5,7 @@ This repository serves as a collection of FastAPI tutorials, examples, and proje
       GET /: Welcome endpoint
       GET /products/: Get all products
       GET /products/{product_id}: Get a specific product by ID
+      GET /products/{product_name}: Get a specific product by name
       POST /products/: Create a new product
       PUT /products/: Update an existing product
       PATCH /products/: Partially update an existing product
