@@ -25,17 +25,3 @@ DELETE /products/: Deletes an existing product
    API: http://localhost:8000
    Interactive SwaggerUI docs: http://localhost:8000/docs
    ReDoc: http://localhost:8000/redoc
-
-# Models
-
-## Product
-    id: integer
-    name: string
-    description: string
-    price: float
-    quantity: integer
-
-# Built With
-    FastAPI - Modern, fast web framework for building APIs
-    Pydantic - Data validation using Python type hints
-    Uvicorn - ASGI server implementation
