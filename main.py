@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException, Path
 from fastapi.middleware.cors import CORSMiddleware
 from models import Products
 from db_config import session, db_engine
@@ -55,25 +55,25 @@ def get_all_products(db:Session = Depends(get_db)): # Dependency Injection
     db_products = db.query(db_models.Products).all()
     if db_products:
         return db_products
-    return "Product list is empty!"
+    raise HTTPException(status_code=404, detail="Product list is empty!")
 
 # Get product by id
 @app.get("/products/{id}")
-def get_product_by_id(id: int, db:Session = Depends(get_db)): # Dependency Injection
+def get_product_by_id(id: int = Path(..., description="Product ID", example=1), db:Session = Depends(get_db)): # Dependency Injection
     db_product = db.query(db_models.Products).filter(db_models.Products.id == id).first()
     if db_product:
         return db_product
         
-    return "Product Not Found!"
+    raise HTTPException(status_code=404, detail="Product not found!")
 
 # Get product by name
 @app.get("/products/name/{name}")
-def get_product_by_name(name: str, db:Session = Depends(get_db)): # Dependency Injection
+def get_product_by_name(name: str = Path(..., description="Product Name", example="Phone"), db:Session = Depends(get_db)): # Dependency Injection
     db_product = db.query(db_models.Products).filter(db_models.Products.name == name).first()
     if db_product:
         return db_product
         
-    return "Product Not Found!"
+    raise HTTPException(status_code=404, detail="Product not found!")
 
 # Add a new product
 @app.post("/products")
@@ -84,7 +84,7 @@ def add_product(prod: Products, db:Session = Depends(get_db)): # Dependency Inje
 
 # Update a product
 @app.put("/products/{id}")
-def update_product(id: int, prod: Products, db:Session = Depends(get_db)): # Dependency Injection
+def update_product(id: int = Path(..., description="Product ID", example=1), prod: Products = Path(..., description="Product Details"), db:Session = Depends(get_db)): # Dependency Injection
     db_product = db.query(db_models.Products).filter(db_models.Products.id == id).first()
     if db_product:
         db_product.name = prod.name
@@ -92,28 +92,28 @@ def update_product(id: int, prod: Products, db:Session = Depends(get_db)): # Dep
         db_product.price = prod.price
         db_product.quantity = prod.quantity
         db.commit()
-        return "Product Updated Succesfully"
+        return {"message": "Product Updated Succesfully"}
         
-    return "Product not found!"
+    raise HTTPException(status_code=404, detail="Product not found!")
 
 # Update a product partially
 @app.patch("/products/{id}")
-def update_product_part(id: int, name: str, db:Session = Depends(get_db)): # Dependency Injection
+def update_product_part(id: int = Path(..., description="Product ID", example=1), name: str = Path(..., description="Product Name", example="Phone"), db:Session = Depends(get_db)): # Dependency Injection
     db_product = db.query(db_models.Products).filter(db_models.Products.id == id).first()
     if db_product:
         db_product.name = name
         db.commit()
-        return "Product Succesfully Patched"
+        return {"message": "Product Succesfully Patched"}
         
-    return "Product not found!"
+    raise HTTPException(status_code=404, detail="Product not found!")
 
 # Delete a product
 @app.delete("/products/{id}")
-def delete_product(id: int, db:Session = Depends(get_db)): # Dependency Injection
+def delete_product(id: int = Path(..., description="Product ID", example=1), db:Session = Depends(get_db)): # Dependency Injection
     db_product = db.query(db_models.Products).filter(db_models.Products.id == id).first()
     if db_product:
         db.delete(db_product)
         db.commit()
-        return "Product Deleted Succesfully"
+        return {"message": "Product Deleted Succesfully"}
         
-    return "Product not found!"
+    raise HTTPException(status_code=404, detail="Product not found!")
