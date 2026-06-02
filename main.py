@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Path, Query, HTTPException
+from fastapi.responses import JSONResponse
 import json
+from models import Patient
 
 
 app = FastAPI()
@@ -7,6 +9,10 @@ app = FastAPI()
 def load_data():
     with open('patients.json', 'r') as f:
         return json.load(f)
+    
+def save_data(data):
+    with open('patients.json', 'w') as f:
+        json.dump(data, f)
 
 @app.get("/")
 def hello():
@@ -24,7 +30,7 @@ def view_patients():
 
 # Endpoint with path parameter
 @app.get("/patient/{patiend_id}")
-def view_patients(patiend_id : str = Path(..., description= "ID of a Patient", example= "P001")):
+def get_patient(patiend_id : str = Path(..., description= "ID of a Patient", examples = ["P001"])):
     patient_data = load_data()
     if patiend_id in patient_data:
         return patient_data[patiend_id]
@@ -33,7 +39,7 @@ def view_patients(patiend_id : str = Path(..., description= "ID of a Patient", e
 
 # Enpoint with query parameter
 @app.get("/patient_sort")
-def view_sorted_patient(sort_by : str = Query(..., decsription= "Sorting patient details based on height or weight or age or bmi", example = 'Height'),
+def view_sorted_patient(sort_by : str = Query(..., decsription= "Sorting patient details based on height or weight or age or bmi", examples = ['Height']),
                         order : str  = Query('asc', description= "Sorting order of asc or desc")):
     
     patient_data = load_data()
@@ -50,3 +56,17 @@ def view_sorted_patient(sort_by : str = Query(..., decsription= "Sorting patient
     sorted_data = sorted(patient_data.values(), key = lambda x : x.get(sort_by, 0), reverse=sort_order )
 
     return sorted_data
+
+@app.post("/addPatient")
+def create_patient(patient: Patient):
+
+    patient_data = load_data()
+
+    if patient.id in patient_data:
+        raise HTTPException(status_code=400, detail= 'Patient already exists')
+    
+    patient_data[patient.id] = patient.model_dump(exclude=['id'])
+
+    save_data(patient_data)
+
+    return JSONResponse(status_code=201, content='Patient successfully created')
