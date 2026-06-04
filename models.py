@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, computed_field
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 
 class Patient(BaseModel):
     id: Annotated[str, Field(..., description="ID of the patient", example=['P001'])]
@@ -26,3 +26,12 @@ class Patient(BaseModel):
             return 'Overweight'
         else:
             return 'Obese'
+        
+#New model for update a patient
+class PatientUpdate(BaseModel):
+    name: Annotated[Optional[str], Field(description = "name of the patient", default = None)]
+    city: Annotated[Optional[str], Field(description = "city of the patient", default = None)]
+    age: Annotated[Optional[int], Field(gt=0, le=120, description = 'Age of the patient', default = None)]
+    gender: Annotated[Optional[Literal['male', 'female', 'others']], Field(description= 'Gender of the patient', default = None)]
+    height: Annotated[Optional[float], Field(gt=0, description= 'Height of the patient (in meters)', default = None)]
+    weight: Annotated[Optional[float], Field(gt=0, description= 'Weight of the patient (in kgs)', default = None)]
