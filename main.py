@@ -65,6 +65,7 @@ def create_patient(patient: Patient):
     if patient.id in patient_data:
         raise HTTPException(status_code=400, detail= 'Patient already exists')
     
+    
     patient_data[patient.id] = patient.model_dump(exclude=['id'])
 
     save_data(patient_data)
