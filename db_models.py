@@ -3,11 +3,16 @@ from sqlalchemy import Column, Integer, String, Float
 
 Base = declarative_base()
 
-class Products(Base):
+class Patients(Base):
 
-    __tablename__ = "products"
-    id= Column(Integer, primary_key = True, index = True)
+    __tablename__ = "patients"
+    
+    id= Column(String, primary_key = True, index = True)
     name= Column(String)
-    description= Column(String)
-    price= Column(Float)
-    quantity= Column(Integer)
+    city = Column(String)
+    age = Column(Integer)
+    gender = Column(String)
+    height = Column(Float)
+    weight = Column(Float)
+    bmi = Column(Float)
+    verdict = Column(String)
