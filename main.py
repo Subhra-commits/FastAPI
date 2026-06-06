@@ -79,7 +79,7 @@ def update_patient(new_data: PatientUpdate, patient_id: str = Path(..., descript
     patient_id = patient_id.upper()
 
     if patient_id not in patient_data:
-        raise HTTPException(status_code = 200, detail = 'Patient not found!')
+        raise HTTPException(status_code = 404, detail = 'Patient not found!')
 
     existing_patient_info = patient_data[patient_id]
     updated_patient_info = new_data.model_dump(exclude_unset = True)
@@ -106,7 +106,7 @@ def delete_patient(patient_id: str = Path(..., description='Patient ID')):
     patient_id = patient_id.upper()
 
     if patient_id not in patient_data:
-        raise HTTPException(status_code = 200, detail = 'Patient not found!')
+        raise HTTPException(status_code = 404, detail = 'Patient not found!')
     
     del patient_data[patient_id]
 
