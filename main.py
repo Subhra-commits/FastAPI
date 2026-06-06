@@ -1,10 +1,19 @@
 from fastapi import FastAPI, Path, Query, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import json
 from models import Patient, PatientUpdate
 
 
 app = FastAPI()
+
+# Middleware added for CORS handling to allow requests from frontend running on localhost:3000
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = ["http://localhost:3000"],
+    allow_methods = ["*"],
+    allow_headers = ["*"]
+)
 
 def load_data():
     with open('patients.json', 'r') as f:
@@ -13,6 +22,7 @@ def load_data():
 def save_data(data):
     with open('patients.json', 'w') as f:
         json.dump(data, f)
+
 
 @app.get("/")
 def hello():
@@ -26,16 +36,18 @@ def about():
 @app.get("/view")
 def view_patients():
     patient_data = load_data()
-    return patient_data
+    if patient_data:
+        return patient_data
+    raise HTTPException(status_code=404, detail="No Patient found!")
 
 # Endpoint with path parameter
 @app.get("/patient/{patiend_id}")
-def get_patient(patiend_id : str = Path(..., description= "ID of a Patient", examples = ["P001"])):
+def get_patient(patient_id : str = Path(..., description= "ID of a Patient", examples = ["P001"])):
     patient_data = load_data()
     patient_id = patient_id.upper()
-    if patiend_id in patient_data:
-        return patient_data[patiend_id]
-    # return {'Error':'Patient not found!'}
+    if patient_id in patient_data:
+        return patient_data[patient_id]
+  
     raise HTTPException(status_code=404, detail="Patient not found!")
 
 # Enpoint with query parameter
@@ -79,7 +91,7 @@ def update_patient(new_data: PatientUpdate, patient_id: str = Path(..., descript
     patient_id = patient_id.upper()
 
     if patient_id not in patient_data:
-        raise HTTPException(status_code = 404, detail = 'Patient not found!')
+        raise HTTPException(status_code = 200, detail = 'Patient not found!')
 
     existing_patient_info = patient_data[patient_id]
     updated_patient_info = new_data.model_dump(exclude_unset = True)
@@ -106,7 +118,7 @@ def delete_patient(patient_id: str = Path(..., description='Patient ID')):
     patient_id = patient_id.upper()
 
     if patient_id not in patient_data:
-        raise HTTPException(status_code = 404, detail = 'Patient not found!')
+        raise HTTPException(status_code = 200, detail = 'Patient not found!')
     
     del patient_data[patient_id]
 

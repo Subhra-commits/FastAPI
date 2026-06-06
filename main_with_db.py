@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Path, Query, HTTPException, Depends
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import json
 from models import Patient, PatientUpdate
 from db_config import session, db_engine
@@ -8,6 +9,14 @@ from sqlalchemy.orm import Session
 
 
 app = FastAPI()
+
+# Middleware added for CORS handling to allow requests from frontend running on localhost:3000
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = ["http://localhost:3000"],
+    allow_methods = ["*"],
+    allow_headers = ["*"]
+)
 
 db_models.Base.metadata.create_all(bind = db_engine)
 
