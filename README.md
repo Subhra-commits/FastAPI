@@ -30,19 +30,19 @@ This repository serves as a collection of FastAPI tutorials, examples, and proje
 # Models
 
 ## Product
-#Request Model
-    age: int
-    weight: float
-    height: float
-    income_lpa: float
-    smoker: bool
-    city: str
-    occupation: Literal
+      #Request Model
+          age: int
+          weight: float
+          height: float
+          income_lpa: float
+          smoker: bool
+          city: str
+          occupation: Literal
 
-#Response Model
-      predicted_premium: str
-      confidence_score: float
-      class_probabilities: Dict
+      #Response Model
+            predicted_premium: str
+            confidence_score: float
+            class_probabilities: Dict
 
 # Built With
     FastAPI - Modern, fast web framework for building APIs
