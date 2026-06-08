@@ -3,13 +3,8 @@ This repository serves as a collection of FastAPI tutorials, examples, and proje
 
 # Fetaures
       GET /: Welcome endpoint
-      GET /products/: Get all products
-      GET /products/{product_id}: Get a specific product by ID
-      GET /products/{product_name}: Get a specific product by name
-      POST /products/: Create a new product
-      PUT /products/: Update an existing product
-      PATCH /products/: Partially update an existing product
-      DELETE /products/: Deletes an existing product
+      GET /health: Health checkup
+      POST /predict/: Predict the premium amount
 
 # Setup 
       1. Create and activate virtual environment:
@@ -17,7 +12,8 @@ This repository serves as a collection of FastAPI tutorials, examples, and proje
             myenv\Scripts\activate.ps1  # Windows PowerShell
    
       2. Install dependencies:
-            pip install fastapi uvicorn   
+            pip install fastapi uvicorn
+            or pip install -r requirements.txt
    
       3. Run the application:
             uvicorn main:app --reload
