@@ -3,13 +3,14 @@ This repository serves as a collection of FastAPI tutorials, examples, and proje
 
 # Fetaures
       GET /: Welcome endpoint
-      GET /products/: Get all products
-      GET /products/{product_id}: Get a specific product by ID
-      GET /products/{product_name}: Get a specific product by name
-      POST /products/: Create a new product
-      PUT /products/: Update an existing product
+      GET /about/: About the API
+      GET /view/: View all patients
+      GET /patient/{patiend_id}: Get a specific patient by ID
+      GET /patient_sort: Get patient details in sorting order
+      POST /addPatient/: Create a new patient
+      PUT /edit/{patient_id}/: Update an existing patient
       PATCH /products/: Partially update an existing product
-      DELETE /products/: Deletes an existing product
+      DELETE /delete/{patient_id}/: Deletes an existing patient
 
 # Setup 
       1. Create and activate virtual environment:
@@ -17,7 +18,8 @@ This repository serves as a collection of FastAPI tutorials, examples, and proje
             myenv\Scripts\activate.ps1  # Windows PowerShell
    
       2. Install dependencies:
-            pip install fastapi uvicorn   
+            pip install fastapi uvicorn 
+            or pip install -r requirements.txt
    
       3. Run the application:
             uvicorn main:app --reload
@@ -30,11 +32,15 @@ This repository serves as a collection of FastAPI tutorials, examples, and proje
 # Models
 
 ## Product
-    id: integer
-    name: string
-    description: string
-    price: float
-    quantity: integer
+    id: str
+    name: str
+    city: str
+    age: int
+    gender: Literal
+    height: float
+    weight: float
+    bmi: computed_value
+    verdict: computed_value
 
 # Built With
     FastAPI - Modern, fast web framework for building APIs
