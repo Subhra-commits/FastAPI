@@ -1,127 +1,36 @@
-from fastapi import FastAPI, Path, Query, HTTPException
+from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import json
-from models import Patient, PatientUpdate
-
+from schema.request_model import UserInput
+from schema.response_model import PredictedResponse
+from model.predict import model, MODEL_VERSION, predict_output
 
 app = FastAPI()
 
-# Middleware added for CORS handling to allow requests from frontend running on localhost:3000
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins = ["http://localhost:3000"],
-    allow_methods = ["*"],
-    allow_headers = ["*"]
-)
-
-def load_data():
-    with open('patients.json', 'r') as f:
-        return json.load(f)
-    
-def save_data(data):
-    with open('patients.json', 'w') as f:
-        json.dump(data, f)
-
-
 @app.get("/")
-def hello():
-    return {"message": "Patient Enrollment API"}
+def home():
+    return JSONResponse(status_code= 200, content={'message' : 'Welcome to the Insurance Premium Prediction API'})
 
+@app.get("/health")
+def health_check():
+    return JSONResponse(status_code= 200, content={'status': 'OK', 'model_version': MODEL_VERSION})
 
-@app.get("/about")
-def about():
-    return {'message': 'A fully functional API to manage your patient records.'}
+@app.post("/predict", response_model= PredictedResponse)
+def predict_premium(userData : UserInput):
+    user_input = {
+        'age': userData.age,
+        'weight': userData.weight,
+        'height': userData.height,
+        'smoker': userData.smoker,
+        'city': userData.city,
+        'income_lpa': userData.income_lpa,
+        'occupation': userData.occupation
+    }
 
-@app.get("/view")
-def view_patients():
-    patient_data = load_data()
-    if patient_data:
-        return patient_data
-    raise HTTPException(status_code=404, detail="No Patient found!")
-
-# Endpoint with path parameter
-@app.get("/patient/{patiend_id}")
-def get_patient(patient_id : str = Path(..., description= "ID of a Patient", examples = ["P001"])):
-    patient_data = load_data()
-    patient_id = patient_id.upper()
-    if patient_id in patient_data:
-        return patient_data[patient_id]
-  
-    raise HTTPException(status_code=404, detail="Patient not found!")
-
-# Enpoint with query parameter
-@app.get("/patient_sort")
-def view_sorted_patient(sort_by : str = Query(..., description= "Sorting patient details based on height or weight or age or bmi", examples = ['Height']),
-                        order : str  = Query('asc', description= "Sorting order of asc or desc")):
+    try:
+        premium_prediction = predict_output(user_input)
+        return JSONResponse(status_code= 200, content={'Response' : premium_prediction})
     
-    patient_data = load_data()
+    except Exception as e:
+        return JSONResponse(status_code=500, content={'error': str(e)})
 
-    sort_by_list = ['height', 'weight', 'age', 'bmi']
-    sort_order = True if order == 'desc' else False
-
-    if sort_by not in sort_by_list:
-        raise HTTPException(status_code=400, detail = 'Invalid sort by value selected')
     
-    if order not in ['asc', 'desc']:
-        raise HTTPException(status_code = 400, detail = 'Invalid sorting order selected')
-    
-    sorted_data = sorted(patient_data.values(), key = lambda x : x.get(sort_by, 0), reverse=sort_order )
-
-    return sorted_data
-
-@app.post("/addPatient")
-def create_patient(patient: Patient):
-
-    patient_data = load_data()
-
-    if patient.id in patient_data:
-        raise HTTPException(status_code=400, detail= 'Patient already exists')
-    
-    patient_data[patient.id] = patient.model_dump(exclude=['id'])
-
-    save_data(patient_data)
-
-    return JSONResponse(status_code=201, content='Patient successfully created')
-
-@app.put("/edit/{patient_id}")
-def update_patient(new_data: PatientUpdate, patient_id: str = Path(..., description='Patient ID')):
-
-    patient_data = load_data()
-    patient_id = patient_id.upper()
-
-    if patient_id not in patient_data:
-        raise HTTPException(status_code = 200, detail = 'Patient not found!')
-
-    existing_patient_info = patient_data[patient_id]
-    updated_patient_info = new_data.model_dump(exclude_unset = True)
-
-    for key, value in updated_patient_info.items():
-        existing_patient_info[key] = value
-
-    existing_patient_info['id'] = patient_id
-    existing_info_obj = Patient(**existing_patient_info)
-
-    existing_patient_info = existing_info_obj.model_dump(exclude = 'id')
-
-    patient_data[patient_id] = existing_patient_info
-
-    save_data(patient_data)
-
-    return JSONResponse(status_code = 200, content = {'message' : 'Patient details updated successfully'})
-
-
-@app.delete("/delete/{patient_id}")
-def delete_patient(patient_id: str = Path(..., description='Patient ID')):
-
-    patient_data = load_data()
-    patient_id = patient_id.upper()
-
-    if patient_id not in patient_data:
-        raise HTTPException(status_code = 200, detail = 'Patient not found!')
-    
-    del patient_data[patient_id]
-
-    save_data(patient_data)
-
-    return JSONResponse(status_code = 200, content = {'message' : 'Patient details deleted successfully'})
